@@ -1,0 +1,89 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        neovim_version:
+          - stable
+          - nightly
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Neovim
+        uses: rhysd/action-setup-vim@v1
+        with:
+          neovim: true
+          version: ${{ matrix.neovim_version }}
+
+      - name: Install dependencies
+        run: |
+          # Install plenary.nvim for testing
+          git clone --depth 1 https://github.com/nvim-lua/plenary.nvim ~/.local/share/nvim/site/pack/vendor/start/plenary.nvim
+
+          # Install nvim-cmp
+          git clone --depth 1 https://github.com/hrsh7th/nvim-cmp ~/.local/share/nvim/site/pack/vendor/start/nvim-cmp
+
+      - name: Run tests
+        run: |
+          nvim --version
+          make test-basic
+
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Lua and luarocks
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lua5.3 luarocks
+
+      - name: Install luacheck
+        run: |
+          sudo luarocks install luacheck
+
+      - name: Run luacheck
+        run: |
+          make lint
+
+  format:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install stylua
+        uses: JohnnyMorganz/stylua-action@v4
+        with:
+          token: ${{ github.token }}
+          version: latest
+          args: --check .
+
+  docs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check documentation
+        run: |
+          # Check if help tags are valid
+          if [ -f "doc/cmp-claudecode.txt" ]; then
+            echo "Help documentation found"
+            # Simple validation
+            grep -q "cmp-claudecode.txt" doc/cmp-claudecode.txt || exit 1
+            grep -q "cmp-claudecode-contents" doc/cmp-claudecode.txt || exit 1
+          else
+            echo "Help documentation not found!"
+            exit 1
+          fi
