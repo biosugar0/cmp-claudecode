@@ -1,5 +1,9 @@
 # cmp-claudecode
 
+[![CI](https://github.com/biosugar0/cmp-claudecode/workflows/CI/badge.svg)](https://github.com/biosugar0/cmp-claudecode/actions)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Neovim](https://img.shields.io/badge/Neovim-0.7%2B-green.svg)](https://neovim.io/)
+
 A minimal [nvim-cmp](https://github.com/hrsh7th/nvim-cmp) source for Claude Code completions.
 
 ## Features
