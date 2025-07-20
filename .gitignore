@@ -1,0 +1,24 @@
+# Lua
+*.log
+luac.out
+
+# Neovim
+.netrwhist
+*~
+
+# Test artifacts
+test_files/
+*.swp
+*.swo
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Local development
+.luacheckrc.local
+.env
+
+# Test custom commands
+.claude/
