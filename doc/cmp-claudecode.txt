@@ -1,0 +1,142 @@
+*cmp-claudecode.txt*	Claude Code completion source for nvim-cmp
+
+==============================================================================
+CONTENTS                                               *cmp-claudecode-contents*
+
+Introduction ................................................. |cmp-claudecode|
+Requirements ....................................... |cmp-claudecode-requirements|
+Installation ....................................... |cmp-claudecode-installation|
+Setup ...................................................... |cmp-claudecode-setup|
+Configuration ..................................... |cmp-claudecode-configuration|
+Usage ...................................................... |cmp-claudecode-usage|
+Performance ......................................... |cmp-claudecode-performance|
+API ......................................................... |cmp-claudecode-api|
+
+==============================================================================
+INTRODUCTION                                                    *cmp-claudecode*
+
+cmp-claudecode is a minimal completion source for nvim-cmp that provides
+completions for Claude Code.
+
+Features:
+• File references with `@` - Quickly reference project files
+• Slash commands with `/` - Access Claude Code commands
+
+==============================================================================
+REQUIREMENTS                                      *cmp-claudecode-requirements*
+
+• Neovim >= 0.7.0
+• nvim-cmp (https://github.com/hrsh7th/nvim-cmp)
+
+==============================================================================
+INSTALLATION                                      *cmp-claudecode-installation*
+
+Using lazy.nvim:
+>lua
+    {
+      'biosugar0/cmp-claudecode',
+      dependencies = { 'hrsh7th/nvim-cmp' },
+      config = function()
+        require('cmp-claudecode').setup()
+      end
+    }
+<
+
+==============================================================================
+SETUP                                                  *cmp-claudecode-setup*
+
+Basic setup:
+>lua
+    local cmp = require('cmp')
+    cmp.register_source('claudecode', require('cmp-claudecode'))
+    
+    -- Enable for specific filetypes
+    cmp.setup.filetype({ 'markdown', 'gitcommit', 'text' }, {
+      sources = {
+        { name = 'claudecode' },
+        { name = 'path' },
+        { name = 'buffer' },
+      }
+    })
+<
+
+Setup with custom configuration:
+>lua
+    require('cmp-claudecode').setup({
+      max_items = 100,  -- Only configurable option
+    })
+<
+
+==============================================================================
+CONFIGURATION                                    *cmp-claudecode-configuration*
+
+The plugin has only one configurable option:
+
+`max_items` (number, default: 50)
+    Maximum number of completion items to show.
+
+All other settings are optimized internally:
+• Trigger characters: '@' for files, '/' for commands
+• Hidden files: Not shown
+• Excluded patterns: .git/, node_modules/, .DS_Store
+• Performance: Async completion, caching, and fuzzy search
+
+Example configuration:
+>lua
+    require('cmp-claudecode').setup({
+      max_items = 100,
+    })
+<
+
+==============================================================================
+USAGE                                                  *cmp-claudecode-usage*
+
+File References                               *cmp-claudecode-file-references*
+
+Type `@` to get file path completions:
+• `@src/` - Lists files in src directory
+• `@test/` - Lists files in test directory
+• Works with relative paths
+
+Slash Commands                                 *cmp-claudecode-slash-commands*
+
+Type `/` to see available Claude Code commands:
+• `/help` - Get usage help
+• `/clear` - Clear conversation history
+• `/model` - Select or change the AI model
+• `/config` - View/modify configuration
+• And many more...
+
+Custom commands are discovered from:
+• `.claude/commands/` (project-specific)
+• `~/.claude/commands/` (user-specific)
+
+==============================================================================
+PERFORMANCE                                      *cmp-claudecode-performance*
+
+The plugin is optimized for performance by default:
+
+• Asynchronous completion - Never blocks the UI
+• Smart caching - Reduces repeated file system operations
+• Fuzzy search - Fast incremental matching
+• Debounced input - Prevents excessive requests
+• Memory management - Automatic cache eviction
+
+All performance features are built-in and require no configuration.
+
+==============================================================================
+API                                                      *cmp-claudecode-api*
+
+                                                      *cmp-claudecode.setup()*
+`require('cmp-claudecode').setup({opts})`
+    Configure the plugin with custom options.
+
+    Parameters: ~
+        {opts} (table|nil) Configuration options
+
+                                                        *cmp-claudecode.new()*
+`require('cmp-claudecode').new()`
+    Create a new source instance. Usually called by nvim-cmp internally.
+
+==============================================================================
+vim:tw=78:ts=8:ft=help:norl:
