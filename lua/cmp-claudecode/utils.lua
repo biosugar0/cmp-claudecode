@@ -75,6 +75,7 @@ function M.get_file_references(before_cursor, options, callback)
 		return
 	end
 	M.debug_print('Current working directory: ' .. cwd)
+	local base_cwd = cwd  -- 相対パス計算用に保存
 	
 	local search_dir = cwd
 	local search_pattern = prefix
@@ -107,20 +108,26 @@ function M.get_file_references(before_cursor, options, callback)
 		
 		-- Filter files by pattern
 		if search_pattern ~= '' then
-			files = filter_items(files, search_pattern)
+			files = filter_items(files, search_pattern, function(item)
+				-- base_cwdからの相対パスでフィルタリング
+				local relative_path = item.path:sub(#base_cwd + 2)
+				return relative_path
+			end)
 		end
 		
 		for _, file in ipairs(files) do
 			local is_dir = file.type == 'directory'
-			-- prefixがある場合はディレクトリパスを含む
-			local file_path = prefix == '' and file.name or (prefix .. file.name)
+			-- base_cwdからの相対パスを計算
+			local relative_path = file.path:sub(#base_cwd + 2)  -- base_cwd + '/' を除去
+			-- prefixがある場合は既にパスに含まれている
+			local display_path = relative_path
 			
 			table.insert(items, {
-				label = file.name .. (is_dir and '/' or ''),  -- 表示用（ファイル名のみ）
-				insertText = '@' .. file_path .. (is_dir and '/' or ''),  -- 実際に挿入されるテキスト
-				filterText = '@' .. file_path,  -- フィルタリング用
+				label = display_path .. (is_dir and '/' or ''),  -- 表示用（相対パス）
+				insertText = '@' .. display_path .. (is_dir and '/' or ''),  -- 実際に挿入されるテキスト
+				filterText = '@' .. display_path,  -- フィルタリング用
 				kind = require('cmp').lsp.CompletionItemKind[is_dir and 'Folder' or 'File'],
-				sortText = (is_dir and '0' or '1') .. file.name:lower(),
+				sortText = (is_dir and '0' or '1') .. display_path:lower(),
 				data = {
 					file_path = file.path,
 					is_directory = is_dir,
