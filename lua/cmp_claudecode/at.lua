@@ -17,7 +17,7 @@ function source:is_available()
 end
 
 function source:get_trigger_characters()
-  return { '@' }
+  return { '@', '.', '/' }
 end
 
 function source:get_keyword_pattern()
@@ -27,11 +27,24 @@ end
 function source:complete(params, cb)
   local line = params.context.cursor_before_line
 
-  local at_pos = line:find('@[%w%.%-_/]*$')
+  local at_pos = line:find('@[%.%w%-_/]*$')
 
   if not at_pos then
     cb({})
     return
+  end
+
+  -- Check if user typed @path/. to show hidden files in specific directory
+  local hidden_path_pattern = line:match('@(.-)/%.$')
+  local show_hidden_at_root = line:match('@%.$') ~= nil
+  local show_hidden = hidden_path_pattern or show_hidden_at_root
+  
+  -- Determine the target directory for hidden files
+  local target_dir = nil
+  if show_hidden_at_root then
+    target_dir = ""
+  elseif hidden_path_pattern then
+    target_dir = hidden_path_pattern
   end
 
   local items = {}
@@ -41,6 +54,23 @@ function source:complete(params, cb)
   util.scan_git_root(function(filepath, stat)
     local path = Path:new(filepath)
     local relative = path:make_relative(git_root)
+
+    -- If showing hidden files, filter by directory
+    if show_hidden then
+      local dir = vim.fn.fnamemodify(relative, ':h')
+      local filename = vim.fn.fnamemodify(relative, ':t')
+      
+      -- Check if it's in the target directory
+      if dir == '.' then dir = '' end
+      if dir ~= target_dir then
+        return
+      end
+      
+      -- Only show hidden files/directories
+      if not filename:match('^%.') then
+        return
+      end
+    end
 
     local item = {
       label = '@' .. relative,
@@ -65,7 +95,7 @@ function source:complete(params, cb)
     if #items >= cfg.max_items then
       return false
     end
-  end)
+  end, { force_hidden = show_hidden })
 
   cb(items)
 end

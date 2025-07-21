@@ -56,11 +56,12 @@ function util.format_size(size)
   end
 end
 
-function util.scan_git_root(cb)
+function util.scan_git_root(cb, opts)
+  opts = opts or {}
   local root = util.git_root()
   local cfg = require('cmp_claudecode.config').get()
   scan.scan_dir(root, {
-    hidden = cfg.scan_hidden,
+    hidden = opts.force_hidden or cfg.scan_hidden,
     add_dirs = true,
     respect_gitignore = cfg.respect_gitignore,
     on_insert = function(fp)
