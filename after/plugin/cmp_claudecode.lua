@@ -1,4 +1,3 @@
--- after/plugin/cmp_claudecode.lua
 local cmp = require('cmp')
 
 for _, name in ipairs({ 'slash', 'at' }) do
