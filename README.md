@@ -96,23 +96,6 @@ This plugin is optimized for simplicity and performance:
 - **Hidden Files**: Dynamic hidden file display with `@.` prefix
 - **Minimal Dependencies**: No external dependencies beyond nvim-cmp
 
-## Debugging
-
-Enable debug mode to troubleshoot issues:
-
-```lua
-vim.g.cmp_claudecode_debug = true
-```
-
-To debug slash command completion issues:
-```vim
-:lua vim.g.cmp_claudecode_debug = true
-" Type / and then /h to see debug messages
-:messages
-```
-
-For detailed debugging instructions and LazyVim-specific troubleshooting, see [DEBUG.md](./DEBUG.md).
-
 ## License
 
 MIT

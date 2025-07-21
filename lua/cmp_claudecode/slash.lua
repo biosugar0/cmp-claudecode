@@ -6,37 +6,33 @@ local util = require('cmp_claudecode.util')
 local builtins = require('cmp_claudecode.builtins')
 local config = require('cmp_claudecode.config')
 
-local M = {}
+local source = {}
+
+function source.new()
+  return setmetatable({}, { __index = source })
+end
 
 -- /だけでもトリガーされるようにkeyword_lengthを0に設定
-function M:get_keyword_length()
+function source:get_keyword_length()
   return 0
 end
 
-function M:is_available()
-  local result = config.is_enabled()
-  if vim.g.cmp_claudecode_debug then
-    vim.notify('[cmp-claudecode.slash] is_available: ' .. tostring(result), vim.log.levels.INFO)
-  end
-  return result
+function source:is_available()
+  return config.is_enabled()
 end
 
-function M:get_trigger_characters()
+function source:get_trigger_characters()
   return {'/'}
 end
 
-function M:get_keyword_pattern()
+function source:get_keyword_pattern()
   -- Vim正規表現：/を含めて、\zsで実際のキーワード開始位置を指定
   -- /の後の英数字、アンダースコア、ハイフン、コロンを0文字以上
   -- 注意: *はエスケープしない（量指定子として使用）
   return [[/\zs\%(\k\|[-:]\)*]]
 end
 
-function M:complete(params, cb)
-  if vim.g.cmp_claudecode_debug then
-    vim.notify('[cmp-claudecode.slash] complete() called', vim.log.levels.INFO)
-  end
-  
+function source:complete(params, cb)
   -- 現在の行のカーソル位置までのテキストを取得
   local line = params.context.cursor_before_line
   
@@ -123,9 +119,9 @@ function M:complete(params, cb)
   cb(items)
 end
 
-function M:resolve(item, cb)
+function source:resolve(item, cb)
   -- resolve時に詳細なドキュメントを設定
   cb(item)
 end
 
-return M
+return source

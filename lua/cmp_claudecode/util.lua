@@ -1,4 +1,5 @@
 -- lua/cmp_claudecode/util.lua
+local scan = require('plenary.scandir')
 local util = {}
 
 function util.git_root()
@@ -54,6 +55,22 @@ function util.format_size(size)
   else
     return string.format('%.1f MB', size / (1024 * 1024))
   end
+end
+
+-- gitルート配下のファイルをスキャン
+function util.scan_git_root(cb)
+  local root = util.git_root()
+  local cfg  = require('cmp_claudecode.config').get()
+  scan.scan_dir(root,{
+    hidden = cfg.scan_hidden,
+    add_dirs = true,
+    respect_gitignore = cfg.respect_gitignore,
+    on_insert = function(fp)
+      if fp:match('/%.git/') then return end
+      local stat = vim.loop.fs_stat(fp)
+      if not stat or (stat.type=='file' and stat.size>cfg.max_file_size) then return end
+      cb(fp, stat)
+    end})
 end
 
 return util
