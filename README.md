@@ -1,18 +1,15 @@
 # cmp-claudecode
 
-[![CI](https://github.com/biosugar0/cmp-claudecode/workflows/CI/badge.svg)](https://github.com/biosugar0/cmp-claudecode/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Neovim](https://img.shields.io/badge/Neovim-0.7%2B-green.svg)](https://neovim.io/)
 
 A minimal [nvim-cmp](https://github.com/hrsh7th/nvim-cmp) source for Claude Code completions.
 
 ## Features
 
 - 📁 **File references with `@`** - Quickly reference project files
-  - `@.` prefix shows hidden files dynamically
+  - `@.` and `@path/.` show hidden files per directory
 - 🎢 **Slash commands with `/`** - Access Claude Code commands
 - 📄 **File preview** - Preview file contents on hover
-- 🚀 **Zero configuration** - Works out of the box with automatic registration
 
 ## Installation
 
@@ -21,8 +18,7 @@ Using [lazy.nvim](https://github.com/folke/lazy.nvim):
 ```lua
 {
   'biosugar0/cmp-claudecode',
-  dependencies = { 'hrsh7th/nvim-cmp' },
-  -- No setup required! The plugin automatically registers itself.
+  dependencies = { 'hrsh7th/nvim-cmp', 'nvim-lua/plenary.nvim' },
 }
 ```
 
@@ -30,11 +26,13 @@ The plugin will be automatically available in nvim-cmp. You can configure it for
 
 ```lua
 -- In your cmp configuration
-require('cmp').setup.filetype({ 'markdown', 'gitcommit', 'text' }, {
+require('cmp').setup({
   sources = {
-    { name = 'claudecode', priority = 1000 },
+    { name = 'claude_slash', priority = 900 },
+    { name = 'claude_at', priority = 900 },
     { name = 'path' },
     { name = 'buffer' },
+    -- other sources...
   }
 })
 ```
@@ -46,7 +44,8 @@ require('cmp').setup.filetype({ 'markdown', 'gitcommit', 'text' }, {
 Type `@` to get file path completions:
 - `@src/` - Lists files in src directory
 - `@test/` - Lists files in test directory
-- `@.` - Shows hidden files (dotfiles)
+- `@.` - Shows hidden files in root directory
+- `@src/.` - Shows hidden files in src directory
 - Works with relative paths
 - File preview available on hover
 
@@ -69,23 +68,39 @@ Type `/` to see available Claude Code commands:
 
 ## Configuration
 
-No configuration required! The plugin works out of the box with markdown files by default.
+No configuration required! The plugin works out of the box for all file types by default.
 
 If you need to customize settings:
 
 ```lua
 -- Optional: Only if you need to change defaults
 require('cmp_claudecode').setup({
-  -- Enable for specific filetypes (default: { 'markdown' })
   enabled = {
+    -- Restrict to specific filetypes (default: nil = all filetypes)
     filetypes = { 'terminal', 'markdown', 'gitcommit', 'text' },
+    
+    -- Or use a custom function for more control
+    -- custom = function()
+    --   local bufname = vim.fn.bufname()
+    --   -- Enable only for editprompt buffers
+    --   return bufname:match('%.editprompt%-') ~= nil
+    -- end,
   },
+  
   -- Maximum number of completion items (default: 200)
   max_items = 200,
+  
+  -- Scan hidden files (default: false)
+  scan_hidden = false,
+  
+  -- Respect .gitignore (default: true)
+  respect_gitignore = true,
+  
+  -- Maximum file size for scanning in bytes (default: 1MB)
+  max_file_size = 1024 * 1024,
 })
 ```
 
-For detailed configuration options, see [README_CONFIG.md](./README_CONFIG.md).
 
 ### Performance
 
@@ -93,8 +108,8 @@ This plugin is optimized for simplicity and performance:
 
 - **Synchronous Operations**: Fast, simple file system scanning inspired by cmp-path
 - **Smart Filtering**: Efficient prefix and substring matching
-- **Hidden Files**: Dynamic hidden file display with `@.` prefix
-- **Minimal Dependencies**: No external dependencies beyond nvim-cmp
+- **Hidden Files**: Dynamic per-directory display with `@path/.` pattern or global with `scan_hidden` option
+- **Minimal Dependencies**: Only requires nvim-cmp and plenary.nvim
 
 ## License
 
