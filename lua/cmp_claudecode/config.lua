@@ -2,7 +2,7 @@ local M = {}
 
 local defaults = {
   enabled = {
-    filetypes = { 'markdown' },
+    filetypes = nil,
     bufname_patterns = nil,
     custom = nil,
   },
@@ -29,7 +29,11 @@ function M.is_enabled()
     return cfg.custom()
   end
 
-  if cfg.filetypes and #cfg.filetypes > 0 then
+  if not cfg.filetypes then
+    return true
+  end
+
+  if #cfg.filetypes > 0 then
     local ft = vim.bo.filetype
     local ft_matched = false
     for _, allowed_ft in ipairs(cfg.filetypes) do
