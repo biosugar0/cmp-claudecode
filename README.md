@@ -9,7 +9,10 @@ A minimal [nvim-cmp](https://github.com/hrsh7th/nvim-cmp) source for Claude Code
 ## Features
 
 - 📁 **File references with `@`** - Quickly reference project files
+  - `@.` prefix shows hidden files dynamically
 - 🎢 **Slash commands with `/`** - Access Claude Code commands
+- 📄 **File preview** - Preview file contents on hover
+- 🚀 **Zero configuration** - Works out of the box with automatic registration
 
 ## Installation
 
@@ -19,23 +22,21 @@ Using [lazy.nvim](https://github.com/folke/lazy.nvim):
 {
   'biosugar0/cmp-claudecode',
   dependencies = { 'hrsh7th/nvim-cmp' },
-  config = function()
-    -- Setup the plugin
-    require('cmp-claudecode').setup()
-    
-    -- Register the source
-    require('cmp').register_source('claudecode', require('cmp-claudecode'))
-    
-    -- Enable for specific filetypes
-    require('cmp').setup.filetype({ 'markdown', 'gitcommit', 'text' }, {
-      sources = {
-        { name = 'claudecode' },
-        { name = 'path' },
-        { name = 'buffer' },
-      }
-    })
-  end
+  -- No setup required! The plugin automatically registers itself.
 }
+```
+
+The plugin will be automatically available in nvim-cmp. You can configure it for specific filetypes:
+
+```lua
+-- In your cmp configuration
+require('cmp').setup.filetype({ 'markdown', 'gitcommit', 'text' }, {
+  sources = {
+    { name = 'claudecode', priority = 1000 },
+    { name = 'path' },
+    { name = 'buffer' },
+  }
+})
 ```
 
 ## Usage
@@ -45,7 +46,9 @@ Using [lazy.nvim](https://github.com/folke/lazy.nvim):
 Type `@` to get file path completions:
 - `@src/` - Lists files in src directory
 - `@test/` - Lists files in test directory
+- `@.` - Shows hidden files (dotfiles)
 - Works with relative paths
+- File preview available on hover
 
 ### Slash Commands
 
@@ -66,23 +69,32 @@ Type `/` to see available Claude Code commands:
 
 ## Configuration
 
+No configuration required! The plugin works out of the box with markdown files by default.
+
+If you need to customize settings:
+
 ```lua
-require('cmp-claudecode').setup({
-  -- Maximum number of completion items (default: 50)
-  max_items = 100,
+-- Optional: Only if you need to change defaults
+require('cmp_claudecode').setup({
+  -- Enable for specific filetypes (default: { 'markdown' })
+  enabled = {
+    filetypes = { 'terminal', 'markdown', 'gitcommit', 'text' },
+  },
+  -- Maximum number of completion items (default: 200)
+  max_items = 200,
 })
 ```
 
-That's it! All other settings are optimized internally.
+For detailed configuration options, see [README_CONFIG.md](./README_CONFIG.md).
 
 ### Performance
 
-This plugin is optimized for performance out of the box:
+This plugin is optimized for simplicity and performance:
 
-- **Async Completion**: Non-blocking file system operations
-- **Smart Caching**: Automatic caching with memory management
-- **Fuzzy Search**: Fast incremental search for better matches
-- **Debounced Input**: Prevents excessive completion requests
+- **Synchronous Operations**: Fast, simple file system scanning inspired by cmp-path
+- **Smart Filtering**: Efficient prefix and substring matching
+- **Hidden Files**: Dynamic hidden file display with `@.` prefix
+- **Minimal Dependencies**: No external dependencies beyond nvim-cmp
 
 ## Debugging
 
@@ -98,6 +110,8 @@ To debug slash command completion issues:
 " Type / and then /h to see debug messages
 :messages
 ```
+
+For detailed debugging instructions and LazyVim-specific troubleshooting, see [DEBUG.md](./DEBUG.md).
 
 ## License
 
