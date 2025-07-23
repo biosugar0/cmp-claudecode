@@ -22,6 +22,22 @@ Using [lazy.nvim](https://github.com/folke/lazy.nvim):
 }
 ```
 
+Or with custom configuration (e.g., for editprompt integration):
+
+```lua
+{
+  'biosugar0/cmp-claudecode',
+  dependencies = { 'hrsh7th/nvim-cmp', 'nvim-lua/plenary.nvim' },
+  opts = {
+    enabled = {
+      custom = function()
+        return vim.env.EDITPROMPT == '1'
+      end,
+    },
+  },
+}
+```
+
 The plugin will be automatically available in nvim-cmp. You can configure it for specific filetypes:
 
 ```lua
@@ -81,9 +97,8 @@ require('cmp_claudecode').setup({
     
     -- Or use a custom function for more control
     -- custom = function()
-    --   local bufname = vim.fn.bufname()
-    --   -- Enable only for editprompt buffers
-    --   return bufname:match('%.editprompt%-') ~= nil
+    --   -- Enable only when launched by editprompt
+    --   return vim.env.EDITPROMPT == '1'
     -- end,
   },
   
